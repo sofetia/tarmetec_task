@@ -7,8 +7,9 @@ $ctrl = new ProductController;
 
 
 $nameErr = $priceErr = "";
-$name = $desc = $quantity = $price = $id = "";
+$name = $desc = $quantity = $price = $id = $client = "";
 $existing = $ctrl->getAll("id", "");
+$clients = $ctrl->getClients();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
 
@@ -31,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     }
 
     if (empty($_POST["quantity"])) {
-        $quantity = "";
+        $quantity = 0;
     } else {
         $quantity = test_input($_POST["quantity"]);
     }
@@ -41,11 +42,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     } else {
         $price = test_input($_POST["price"]);
     }
+    if (empty($_POST["client_id"])) {
+        $client = NULL;
+    } else {
+        $client = test_input($_POST["client_id"]);
+    }
     if (!empty($_POST["name"]) && !empty($_POST["price"]) && empty($_POST["id"])){
-        $ctrl->addProduct($name, $desc, $quantity, $price);
+        $ctrl->addProduct($name, $desc, $quantity, $price, $client);
     }
     if (!empty($_POST["id"])){
-        $ctrl->updateProduct($id, $name, $desc, $quantity, $price);
+        $ctrl->updateProduct($id, $name, $desc, $quantity, $price, $client);
     }
     
 }
@@ -172,6 +178,16 @@ function test_input($data) {
                     Price: <input type="number" name="price">
                     <span class="error"> <?php echo $priceErr;?></span>
                     <br><br>
+                    Client: 
+                    <select name="client_id">
+                        <option value="">None</option>
+                    <?php
+                    while ($clients_row = mysqli_fetch_array($clients)) {
+                        echo '<option value="' . $clients_row['id'] .'">' . $clients_row['name'] .'</option>';
+                    }
+                    ?>
+                    </select>
+
 
                     <p><span class="alert">Only fill this if you wish to update a existing entry</span></p>
                     ID: <input type="number" name="id">
